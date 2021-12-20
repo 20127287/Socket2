@@ -33,15 +33,15 @@ namespace Project1
             StopButton.Enabled = true; // Bật nút stop.
 			IPTextbox.Enabled = false; // Tắt IPTextbox.
 			PortTextbox.Enabled = false; // Tắt PortTextbox.
-            run = true; // Gán run = true;
-        }
+            run = true;  //bật true để biết đã kết nối thành công
+		}
 
 
 		// Click nút stop.
         private void button2_Click(object sender, EventArgs e)
         {            
-            if (run == true)
-            {
+            if (run == true)    //kiểm tra đã kết nối với client chua
+			{
 				// Bật tắt các nút, textbox:
                 StartButton.Enabled = true;
 				DefaultButton.Enabled = true;
@@ -50,8 +50,8 @@ namespace Project1
 				PortTextbox.Enabled = true;
 
 				MessageBox.Show("Đã đóng kết nối thành công", "THÔNG BÁO", MessageBoxButtons.OK); // Xuất thông báo.
-				run = false; // Gán run = false.
-				server.CloseAll(); // Đóng server.
+				run = false; //bật false để biết đã ngắt kết nối
+				server.CloseAll(); // Đóng tất cả các client và server
 			}
             else // Nếu run == false thì báo lỗi.
 				MessageBox.Show("Chưa tạo kết nối!", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -98,8 +98,8 @@ namespace Project1
 		{
 			if (run == true)
 			{
-				run = false;
-				server.CloseAll(); // Đóng server.
+				run = false;    //bật false để biết đã ngắt kết nối
+				server.CloseAll(); // Đóng tất cả các client và server
 			}
 		}
 
