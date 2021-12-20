@@ -52,6 +52,8 @@ namespace TCPClient
         public void Connect(object sender, EventArgs e)
         {
             const Int32 sizePictureMax = 1000000000; // Dung lượng tối đa của ảnh.
+
+            // khởi tạo của client với IP và PORT để kết nối đến server
             client = new Client(IPAddress.Parse(IPTextbox.Text), Int32.Parse(PortTextbox.Text), sizePictureMax);
             bool connect = client.Connect();
             if (connect == true)
@@ -144,17 +146,17 @@ namespace TCPClient
         // Click vào nút Display:
         public void Display(object sender, EventArgs e)
         {
-            if (run == true)
+            if (run == true) //nếu socket kết nối thành công thì mới làm
             {
-                SearchTextBox.Text = "Nhập code";
+                SearchTextBox.Text = "Nhập code"; //hiển thị nhập code mỗi khi thực hiện xong display
                 SearchTextBox.ForeColor = Color.Silver;
                 bool checkServer;
 
                 checkServer = client.Send(DisplayButton.Text); // gửi thông điệp của DisplayButton đến server.
-
-                if (checkServer == true)
+                                                               //và trả về checkSever là true/false để thể hiện gửi thông tin có thành công hay không
+                if (checkServer == true)    //nếu gửi thông tin thành công
                 {
-                    string convert = Encoding.UTF8.GetString(client.Recieve()); // Encoding thông điệp mà client nhập được sacng UTF8.
+                    string convert = Encoding.UTF8.GetString(client.Recieve()); // Encoding thông điệp mà client nhận được sang string
 
                     // DeserializeObject dữ liệu chứa trong convert sang List<PhoneBookClient>:
                     phoneBookClients = JsonConvert.DeserializeObject<List<PhoneBookClient>>(convert);
@@ -184,19 +186,20 @@ namespace TCPClient
         //gui ma so can tìm kiem
         private void Search(object sender, EventArgs e)
         {
-            if (run == true)
+            if (run == true)    //nếu socket kết nối thành công thì mới làm
             {
-                string information = SearchTextBox.Text;
+                string information = SearchTextBox.Text;        // lấy thông tin của ô search
                 bool check = false;
 
+                //kiểm tra ô tìm kiểm có dấu khoảng trắng
                 for (int i = 0; i < information.Length; i++)
                     if (information[i] != ' ')
                         check = true;
                 if (information == "Nhập code")
                     check = false;
                 bool checkServer;
-                if (check)
-                    checkServer = client.Send(SearchTextBox.Text);
+                if (check)          // kiểm tra nếu kiểm tra ô không phải khoảng trắng thì gửi thông tin, còn không thì xuất cảnh báo và thoát hàm
+                    checkServer = client.Send(SearchTextBox.Text);  //checkSever kiểm tra xem gửi client gửi thông tin qua sever thành công hay không
                 else
                 {
                     MessageBox.Show("Bạn chưa nhập mã số", "CẢNH BÁO", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -205,18 +208,18 @@ namespace TCPClient
                     return;
                 }
 
-                if (checkServer == true)
+                if (checkServer == true)        //nếu gửi thông tin thành công thì mới làm
                 {
 
                     //Nhan lai thong tin tu server
                     byte[] recieve = client.Recieve();
                     string data = Encoding.UTF8.GetString(recieve);
 
-                    if (data != "false")
+                    if (data != "false")        // nếu tìm thấy đối tượng
                     {
                         PhoneBookClient phoneBookClient = new PhoneBookClient();
-                        phoneBookClient = JsonConvert.DeserializeObject<PhoneBookClient>(data);
-                        showObject(phoneBookClient);
+                        phoneBookClient = JsonConvert.DeserializeObject<PhoneBookClient>(data);     // chuyển thông tin từ chuỗi vào class
+                        showObject(phoneBookClient);        //hiện thông tin
 
                         NextButton.Enabled = BackButton.Enabled = false;
                         ord.Visible = false;
@@ -225,7 +228,7 @@ namespace TCPClient
                         GoButton.Enabled = false;
                         GoTextbox.Enabled = false;
                         DisplayButton.Enabled = true;
-                    }
+                    } //nếu không tìm thấy thì data="false"
                     else MessageBox.Show("Không có trong danh sách", "THÔNG BÁO", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
                 else MessageBox.Show("Không kết nối được với server!", "LỖI", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -244,8 +247,15 @@ namespace TCPClient
             NameView.Text = phoneBookClient.name;
             PhoneView.Text = phoneBookClient.phone;
             EmailView.Text = phoneBookClient.email;
-            if (phoneBookClient.avatar != null)
+            if (phoneBookClient.avatar != null) // kiểm tra xem có avatar hay không
                 pictureBox.Image = new Bitmap(Image.FromStream(new MemoryStream(phoneBookClient.avatar)), new Size(300, 300));
+            /*chuyển avatar từ byte[] về MemoryStream -> chuyển về image -> chuyển về bitmap để hiển thị
+                //MemoryStream là một lớp mở rộng trực tiếp từ lớp Stream, nó là luồng (stream) mà dữ liệu được lưu trữ (store) trên bộ nhớ.
+                    //Về bản chất MemoryStream là một đối tượng nó quản lý một bộ đệm (buffer) là một mảng các byte,
+                    //khi các byte được ghi vào luồng này nó sẽ tự động được gán vào các vị trí tiếp theo tính từ vị trí hiện tại của con trỏ trên mảng.
+                    //Khi bộ đệm đầy một mảng mới có kích thước lớn hơn được tạo ra, và copy các dữ liệu từ mảng cũ sang.
+                //Image.FromStream hoạt động dựa trên một cá thể Stream để lấy dữ liệu hình ảnh. Điều này có nghĩa là bạn có thể lấy Hình ảnh từ một mảng byte trong bộ nhớ với MemoryStream
+                //dùng bitmap để để xuất ảnh từ Image.FromStream*/
             else pictureBox.Image = pictureBox.ErrorImage;
         }
 
@@ -374,6 +384,11 @@ namespace TCPClient
 
                 this.Close(); // Đóng form.
             }
+        }
+
+        private void PortTextbox_TextChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }
