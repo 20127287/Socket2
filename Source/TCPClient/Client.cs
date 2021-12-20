@@ -50,11 +50,11 @@ namespace TCPClient
             socket.Close();
         }
 
-        public bool Send(string message)
+        public bool Send(string message) // Gửi thông điệp từ client qua server.
         {
             try
             {
-                socket.Send(Encoding.UTF8.GetBytes(message));
+                socket.Send(Encoding.UTF8.GetBytes(message)); // Thông điệp được gửi đi.
                 return true;
             }
             catch

@@ -20,34 +20,45 @@ namespace Project1
         }
         Server server;
         private bool run = false;
+
+
+		// Click nút start:
         private void button1_Click(object sender, EventArgs e)
         {
-			server = new Server(IPAddress.Parse(IPTextbox.Text), Int32.Parse(PortTextbox.Text), "", 8 * 1024);
+			server = new Server(IPAddress.Parse(IPTextbox.Text), Int32.Parse(PortTextbox.Text), "", 8 * 1024); // Khởi tạo server.
             server.Start();
-			MessageBox.Show("Server đang chạy", "THÔNG BÁO", MessageBoxButtons.OK);
-            StartButton.Enabled = false;
-			DefaultButton.Enabled = false;
-            StopButton.Enabled = true;
-			IPTextbox.Enabled = false;
-			PortTextbox.Enabled = false;
-            run = true;
+			MessageBox.Show("Server đang chạy", "THÔNG BÁO", MessageBoxButtons.OK); // Xuất thông báo.
+            StartButton.Enabled = false; // Tắt nút start.
+			DefaultButton.Enabled = false; // Tắt nút default.
+            StopButton.Enabled = true; // Bật nút stop.
+			IPTextbox.Enabled = false; // Tắt IPTextbox.
+			PortTextbox.Enabled = false; // Tắt PortTextbox.
+            run = true; // Gán run = true;
         }
+
+
+		// Click nút stop.
         private void button2_Click(object sender, EventArgs e)
         {            
             if (run == true)
             {
+				// Bật tắt các nút, textbox:
                 StartButton.Enabled = true;
 				DefaultButton.Enabled = true;
 				StopButton.Enabled = false;
 				IPTextbox.Enabled = true;
 				PortTextbox.Enabled = true;
-				MessageBox.Show("Đã đóng kết nối thành công", "THÔNG BÁO", MessageBoxButtons.OK);
-				run = false;
-				server.CloseAll();
+
+				MessageBox.Show("Đã đóng kết nối thành công", "THÔNG BÁO", MessageBoxButtons.OK); // Xuất thông báo.
+				run = false; // Gán run = false.
+				server.CloseAll(); // Đóng server.
 			}
-            else
+            else // Nếu run == false thì báo lỗi.
 				MessageBox.Show("Chưa tạo kết nối!", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
 		}
+
+
+		// Click nút default:
 		private void button3_Click(object sender, EventArgs e)
 		{
             IPTextbox.Text = "127.1.1.2";
@@ -55,35 +66,45 @@ namespace Project1
         }
 		//************************************************************************
 
+
+		// Click vào IPTextbox:
 		private void textBox1_Click(object sender, EventArgs e)
 		{
-			if (IPTextbox.Text != "")
-				IPTextbox.ForeColor = Color.Black;
+			if (IPTextbox.Text != "") // Nếu IPTextbox không rỗng.
+				IPTextbox.ForeColor = Color.Black; // Chuyển màu kí tự sang màu đen.
 		}
 
+
+		// Click chuột vào IPTextbox:
 		private void textBox1_MouseClick(object sender, MouseEventArgs e)
 		{
 			if (IPTextbox.Text == "Nhập IP")
-				IPTextbox.Text = "";
+				IPTextbox.Text = ""; // Xóa dòng chữ "Nhập IP".
 		}
 
+
+		// Rời khỏi IPTextbox:
 		private void textBox1_Leave(object sender, EventArgs e)
 		{
-			if (IPTextbox.Text == "")
-				IPTextbox.Text = "Nhập IP";
-			IPTextbox.ForeColor = Color.Gray;
+			if (IPTextbox.Text == "") // Nếu IPTextbox rỗng.
+				IPTextbox.Text = "Nhập IP"; // Thêm dòng chữ "nhập IP".
+			IPTextbox.ForeColor = Color.Gray; // Chuyển màu kí tự sang màu xám.
 		}
 		//************************************************************************
 
+
+		// Đóng form:
 		private void TCPServer_FormClosing(object sender, FormClosingEventArgs e)
 		{
 			if (run == true)
 			{
 				run = false;
-				server.CloseAll();
+				server.CloseAll(); // Đóng server.
 			}
 		}
 
+
+		// Các sự kiện của PortTextbox (tương tự như IPTextbox):
 		private void textBox2_Click(object sender, EventArgs e)
 		{
 			if (PortTextbox.Text != "")

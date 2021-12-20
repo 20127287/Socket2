@@ -74,12 +74,14 @@ namespace Project1
     {
         private IPAddress IP;
         private int Port;
-        private List<Socket> ClientSockets;
-        private Socket ServerSocket;
+        private List<Socket> ClientSockets; // List chứa các socket của client.
+        private Socket ServerSocket; // Socket của server.
         private string DB;
         private int Buffer;
         private byte[] Request;
         
+
+        // Constructer của lớp Server:
         public Server(IPAddress ip, int port, string db, int buffer)
         {
             IP = ip;
@@ -90,13 +92,18 @@ namespace Project1
             ClientSockets = new List<Socket>();           
         }
 
+
+        // Khi server bắt đầu:
         public void Start()
         {
-            ServerSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            ServerSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp); // Khởi tạo socket cho server.
             ServerSocket.Bind(new IPEndPoint(IP, Port));
             ServerSocket.Listen(0);
             ServerSocket.BeginAccept(Accept_Callback, null);
         }
+
+
+        // Hàm đóng server:
         public void CloseAll()
         {
             foreach (Socket socket in ClientSockets)
@@ -107,12 +114,14 @@ namespace Project1
             ServerSocket.Close();
         }
 
+
+        // Hàm nhập yêu cầu kết nối của client:
         private void Accept_Callback(IAsyncResult Result)
         {
             try
             {
                 Socket socket = ServerSocket.EndAccept(Result);
-                ClientSockets.Add(socket);
+                ClientSockets.Add(socket); // Add socket của client vào ClientSockets.
                 socket.BeginReceive(Request, 0, Buffer, SocketFlags.None, Receive_Callback, socket);
                 ServerSocket.BeginAccept(Accept_Callback, null);
             }
@@ -126,28 +135,28 @@ namespace Project1
             if (req != null)
             {
                 List<PhoneBookClient> phoneBookClients = new List<PhoneBookClient>();
-                ReadJson("DB/DanhBa.json", phoneBookClients);
+                ReadJson("DB/DanhBa.json", phoneBookClients); // Đọc file json.
 
-                if (req == "Disconnect")
+                if (req == "Disconnect") // Nếu server nhận được thông điệp "Disconnect" từ client.
                 {
-                    socket.Close();
-                    ClientSockets.Remove(socket);
+                    socket.Close(); // Đóng socket.
+                    ClientSockets.Remove(socket); // Remove socket đó ra khỏi ClientSockets.
                 }
                 else
-                if (req == "Display")
+                if (req == "Display") // Nếu server nhận được thông điệp "Display" từ client.
                 {
-                    string convert = JsonConvert.SerializeObject(phoneBookClients);
+                    string convert = JsonConvert.SerializeObject(phoneBookClients); // Chuyển đổi dữ liệu trong file json.
 
-                    socket.Send(Encoding.UTF8.GetBytes(convert));
+                    socket.Send(Encoding.UTF8.GetBytes(convert)); // Gửi dữ liệu đến client.
                     socket.BeginReceive(Request, 0, Buffer, SocketFlags.None, Receive_Callback, socket);
                 }
-                else
+                else // Nếu server nhận được thông điệp "Search" từ client.
                 {
                     foreach (PhoneBookClient phoneBookClient in phoneBookClients)
-                        if (req == phoneBookClient.code)
+                        if (req == phoneBookClient.code) // Nếu tìm thấy.
                         {
                             string convert = JsonConvert.SerializeObject(phoneBookClient);
-                            socket.Send(Encoding.UTF8.GetBytes(convert));
+                            socket.Send(Encoding.UTF8.GetBytes(convert)); // Gửi phần dữ liệu tìm được cho client.
 
                             socket.BeginReceive(Request, 0, Buffer, SocketFlags.None, Receive_Callback, socket);
                             return;
@@ -159,12 +168,14 @@ namespace Project1
             }
         }
 
+
+        // Hàm đọc các request mà client gửi cho server:
         private string ReadRequest(IAsyncResult Result, Socket socket)
         {
             try
             {
-                int received = socket.EndReceive(Result);
-                byte[] resbuffer = new byte[received];
+                int received = socket.EndReceive(Result); // Chuyển đổi Result sang int.
+                byte[] resbuffer = new byte[received]; // Khởi tạo mảng byte.
                 Array.Copy(Request, resbuffer, received);
                 string req = Encoding.UTF8.GetString(resbuffer);
                 return req;
@@ -176,15 +187,21 @@ namespace Project1
             return null;
         }
 
+
+        // Hàm đọc file json:
         private void ReadJson(string address, List<PhoneBookClient> phoneBookClients)
         {
             string data = System.IO.File.ReadAllText(address);
-            List<PhoneBookSever> phoneBookSevers = JsonConvert.DeserializeObject<List<PhoneBookSever>>(data);            
+
+            // Chuyển dữ liệu trong file json sang List<PhoneBookSever>:
+            List<PhoneBookSever> phoneBookSevers = JsonConvert.DeserializeObject<List<PhoneBookSever>>(data);   
 
             foreach (PhoneBookSever phoneBookSever in phoneBookSevers)
             {
+                // Khởi tạo phoneBookClient:
                 PhoneBookClient phoneBookClient = new PhoneBookClient(phoneBookSever);
-                
+
+                // Sau đó add vào phoneBookClients:
                 phoneBookClients.Add(phoneBookClient);
             }
         }
