@@ -77,7 +77,7 @@ namespace Project1
         private List<Socket> ClientSockets; // List chứa các socket của client.
         private Socket ServerSocket; // Socket của server.
         private string DB;
-        private int Buffer;
+        private int Buffer;//kha nang nhan du lieu toi da
         private byte[] Request;
         
 
@@ -91,15 +91,25 @@ namespace Project1
             Request = new byte[Buffer];
             ClientSockets = new List<Socket>();           
         }
-
+        /*
+        cách kết nối:
+       + client mún kết nối với server phải thông qua 1 cái socket
+       + Cần tạo socket cho server 
+       +Lắng nghe kết nối từ client,  đợi khi có client kết nối rồi mới làm các công việc kế tiếp
+       + Khi nghe dc yêu cầu kết nối từ client thì tạo ra việc xử lý các công việc kế tiếp 
+        * */
 
         // Khi server bắt đầu:
         public void Start()
         {
+            //Tao socket mới cho server
+            //AddressFamily.InterNetwork có thể kết nối với kiểu IP ipv4, ipv6
+            //TCP có kiểu socket là stream để đọc viết 
             ServerSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp); // Khởi tạo socket cho server.
-            ServerSocket.Bind(new IPEndPoint(IP, Port));
-            ServerSocket.Listen(0);
-            ServerSocket.BeginAccept(Accept_Callback, null);
+            ServerSocket.Bind(new IPEndPoint(IP, Port));//Hàm kết nối
+            ServerSocket.Listen(0);//minh nói ko cần biết
+            ServerSocket.BeginAccept(Accept_Callback, null);//Chấp nhận kết nối từ server
+            //AcceptCallBack: truyền địa chỉ hàm
         }
 
 
@@ -116,18 +126,24 @@ namespace Project1
 
 
         // Hàm nhập yêu cầu kết nối của client:
-        private void Accept_Callback(IAsyncResult Result)
+        private void Accept_Callback(IAsyncResult Result)//kết quả trả về của việc callback , lưu lại kết quả cuối cùng sau khi quá trình bất đồng bộ hoàn thành
         {
+            // đoạn này ko hỉu lắm, mb xem lại ở 1.01 nhá
             try
             {
-                Socket socket = ServerSocket.EndAccept(Result);
+                //chấp nhận kết nối từ client
+                //Truyền vào Ar để lấy giá trị trả về 
+                Socket socket = ServerSocket.EndAccept(Result);// tạo ra 1 giá trị trả về gắn vào socket
                 ClientSockets.Add(socket); // Add socket của client vào ClientSockets.
+                //Xử lý nhận trên socket
+                //SocketFlags.None để khóa server. khi client ko gửi gì thì khóa lại còn có gửi thì tiếp tục xử lý
                 socket.BeginReceive(Request, 0, Buffer, SocketFlags.None, Receive_Callback, socket);
-                ServerSocket.BeginAccept(Accept_Callback, null);
+                //Xử lý nhận
+                ServerSocket.BeginAccept(Accept_Callback, null);//AcceptCallBack: truyền địa chỉ hàm gọi lại líten
             }
             catch { }
         }
-
+        //Nen coi lại luc 1.20 để biết thêm chi tiết
         private void Receive_Callback(IAsyncResult Result)
         {
             Socket socket = (Socket)Result.AsyncState;
